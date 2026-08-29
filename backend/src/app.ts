@@ -1,5 +1,8 @@
 import express from 'express';
 import authRoutes from './routes/auth.routes';
+import machinesRoutes from './routes/machines.routes';
+import shiftsRoutes from './routes/shifts.routes';
+import catalogRoutes from './routes/catalog.routes';
 import { errorHandler } from './middleware/error';
 
 // Cria a aplicação Express (sem iniciar o listener), para facilitar testes.
@@ -17,6 +20,9 @@ export function createApp() {
   });
 
   app.use('/api/auth', authRoutes);
+  app.use('/api/machines', machinesRoutes);
+  app.use('/api/shifts', shiftsRoutes);
+  app.use('/api/catalog', catalogRoutes);
 
   // 404 para rotas desconhecidas.
   app.use((_req, res) => {
