@@ -152,6 +152,7 @@ router.post('/', requireAuth, async (req: AuthenticatedRequest, res, next) => {
       },
       target, // null quando não há meta => sinaliza a omissão do planejamento
       efficiency,
+      alert: efficiency !== null && efficiency < 80, // REQ-FUNC-008
     });
   } catch (e) {
     next(e);
