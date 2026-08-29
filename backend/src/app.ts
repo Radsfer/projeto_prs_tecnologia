@@ -3,6 +3,7 @@ import authRoutes from './routes/auth.routes';
 import machinesRoutes from './routes/machines.routes';
 import shiftsRoutes from './routes/shifts.routes';
 import targetsRoutes from './routes/targets.routes';
+import recordsRoutes from './routes/records.routes';
 import catalogRoutes from './routes/catalog.routes';
 import { errorHandler } from './middleware/error';
 
@@ -24,6 +25,7 @@ export function createApp() {
   app.use('/api/machines', machinesRoutes);
   app.use('/api/shifts', shiftsRoutes);
   app.use('/api/targets', targetsRoutes);
+  app.use('/api/records', recordsRoutes);
   app.use('/api/catalog', catalogRoutes);
 
   // 404 para rotas desconhecidas.
