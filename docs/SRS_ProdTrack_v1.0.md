@@ -4,7 +4,7 @@
 > **Projeto:** ProdTrack — Plataforma para Gestão Industrial
 > **Versão:** 1.0
 > **Data:** 29/08/2026
-> **Autor:** PRS Tecnologia
+> **Autor:** Rafael Adolfo Silva Ferreira
 
 ---
 
@@ -12,7 +12,7 @@
 
 | Versão | Data | Autor | Alterações |
 |--------|------|-------|------------|
-| 1.0 | 29/08/2026 | PRS Tecnologia | Rascunho inicial — especificação completa do MVP ProdTrack |
+| 1.0 | 29/08/2026 | Rafael Adolfo Silva Ferreira | Rascunho inicial — especificação completa do MVP ProdTrack |
 
 ---
 

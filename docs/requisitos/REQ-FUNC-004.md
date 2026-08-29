@@ -130,4 +130,4 @@ Funcionalidade: Definição de metas de produção
 
 | Versão | Data | Autor | Alteração |
 |--------|------|-------|-----------|
-| 1.0 | 29/08/2026 | `PRS Tecnologia` | Criação inicial |
+| 1.0 | 29/08/2026 | `Rafael Adolfo Silva Ferreira` | Criação inicial |
