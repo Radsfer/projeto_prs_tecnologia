@@ -14,6 +14,16 @@ O ProdTrack digitaliza o registro de produção do chão de fábrica. O operador
 - Gestão de usuários com anonimização (LGPD).
 - Ingestão de telemetria simulada (Mock de IoT) por polling.
 
+## Demonstração
+
+Gestor (painel administrativo):
+
+![Demonstração do gestor](docs/assets/demo-gestor.gif)
+
+Operador (apontamento, mobile-first):
+
+![Demonstração do operador](docs/assets/demo-operador.gif)
+
 ## Stack
 
 | Camada | Tecnologia |
