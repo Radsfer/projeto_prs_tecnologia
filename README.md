@@ -11,8 +11,8 @@ Plataforma de apontamento produtivo e gestão industrial (Indústria 4.0) da **P
 | Backend (API) | Node.js + Express + Prisma ORM |
 | Banco de dados | PostgreSQL 16 |
 | Mock de IoT | Serviço Node.js (telemetria simulada) |
-| Web (Gestor) | React + Vite *(em breve)* |
-| Mobile (Operador) | React Native *(em breve)* |
+| Web (Gestor) | React + Vite |
+| Mobile (Operador) | React Native *(em planejamento)* |
 | Infra | Docker + Docker Compose, Nginx (proxy reverso) |
 
 ## Como rodar (tudo via Docker)
@@ -27,7 +27,7 @@ cd projeto_prs_tecnologia
 # 2. Crie o arquivo de ambiente
 cp .env.example .env
 
-# 3. Suba a stack (PostgreSQL + backend + Mock IoT)
+# 3. Suba a stack (PostgreSQL + backend + Mock IoT + frontend web)
 docker compose up --build
 ```
 
@@ -37,6 +37,7 @@ Na primeira subida o backend executa as migrações e o seed automaticamente.
 
 | Serviço | URL |
 |---------|-----|
+| Web (Gestor) | http://localhost:3000 |
 | API (backend) | http://localhost:3333 |
 | Mock de IoT | http://localhost:3001/mock |
 | PostgreSQL | localhost:5432 |
@@ -78,6 +79,7 @@ O backend roda um **worker agendado** (polling) que interroga o `/mock`, valida 
 .
 ├── backend/        # API Node.js + Express + Prisma (e worker de polling)
 ├── mock-iot/       # Serviço simulador de telemetria (IIoT)
+├── web/            # Frontend React + Vite (interface do Gestor)
 ├── docs/           # SRS e fichas de requisitos (ISO/IEC/IEEE 29148:2018)
 ├── docker-compose.yml
 └── .env.example
