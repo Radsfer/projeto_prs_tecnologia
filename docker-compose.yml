@@ -51,5 +51,14 @@ services:
     ports:
       - "3001:3001"
 
+  web:
+    build: ./web
+    container_name: prodtrack-web
+    restart: unless-stopped
+    depends_on:
+      - backend
+    ports:
+      - "3000:80"
+
 volumes:
   db_data:
