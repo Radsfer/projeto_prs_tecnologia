@@ -70,6 +70,8 @@ O backend consome o serviço de telemetria simulada por **polling assíncrono** 
 - `status_operacional`: `RUNNING` | `IDLE` | `FAULT`.
 - `ciclos_produzidos`: inteiro (volume desde a última leitura).
 
+O backend roda um **worker agendado** (polling) que interroga o `/mock`, valida o payload e consolida os ciclos em apontamentos com `source=IOT` (transação serializável + incremento atômico, para não sobrescrever o registro manual). Timeout de 3s com recuperação no pulso seguinte; transições para `FAULT` disparam a contagem de parada não programada. Eventos de máquina desconhecida são registrados no `AuditLog` e descartados.
+
 ## Estrutura do repositório
 
 ```

@@ -53,6 +53,7 @@ async function main() {
   }
 
   const shifts = [
+    { name: 'Turno Madrugada', startTime: '00:00', endTime: '06:00' },
     { name: 'Turno Manhã', startTime: '06:00', endTime: '14:00' },
     { name: 'Turno Tarde', startTime: '14:00', endTime: '22:00' },
     { name: 'Turno Noite', startTime: '22:00', endTime: '23:59' },
@@ -61,7 +62,7 @@ async function main() {
   for (const s of shifts) {
     await prisma.shift.upsert({
       where: { name: s.name },
-      update: {},
+      update: { startTime: s.startTime, endTime: s.endTime },
       create: s,
     });
   }
