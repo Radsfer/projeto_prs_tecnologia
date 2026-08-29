@@ -1,49 +1,82 @@
-# Templates de Documentação — ISO/IEC/IEEE 29148:2018
+# ProdTrack — Plataforma para Gestão Industrial
 
-Esta pasta contém templates em Markdown para documentação de requisitos de software do projeto, alinhados à norma **ISO/IEC/IEEE 29148:2018**.
+Plataforma de apontamento produtivo e gestão industrial (Indústria 4.0) da **PRS Tecnologia**. Digitaliza a coleta de dados do chão de fábrica, harmonizando o registro manual de operadores (aplicativo móvel) com a telemetria simulada de máquinas (Mock de IoT), e estrutura os dados para alimentar ecossistemas analíticos (Power BI Embed, Microsoft Fabric).
 
-## Arquivos
+> Especificação completa em [`docs/SRS_ProdTrack_v1.0.md`](docs/SRS_ProdTrack_v1.0.md) e fichas de requisitos em [`docs/requisitos/`](docs/requisitos/).
 
-| Arquivo | Propósito |
-|---------|-----------|
-| `TEMPLATE_SRS.md` | Template completo para a **Especificação de Requisitos de Software (SRS)**. Segue a estrutura normativa da seção 9.6 da norma 2018. |
-| `TEMPLATE_REQUISITO.md` | Template de **ficha de requisito individual**. Garante que cada requisito atenda às características da seção 5.2.5 e aos atributos da seção 5.2.8. |
+## Stack
 
-## Como usar
+| Camada | Tecnologia |
+|--------|-----------|
+| Backend (API) | Node.js + Express + Prisma ORM |
+| Banco de dados | PostgreSQL 16 |
+| Mock de IoT | Serviço Node.js (telemetria simulada) |
+| Web (Gestor) | React + Vite *(em breve)* |
+| Mobile (Operador) | React Native *(em breve)* |
+| Infra | Docker + Docker Compose, Nginx (proxy reverso) |
 
-### 1. Criar o SRS do projeto
-1. Faça uma cópia de `TEMPLATE_SRS.md` para a raiz do projeto (ou pasta `docs/`).
-2. Renomeie para algo como `SRS_NOME_DO_PROJETO_v1.0.md`.
-3. Preencha as seções 1 e 2 (Introdução e Visão Geral do Produto) primeiro.
-4. Para cada requisito identificado, preencha a ficha `TEMPLATE_REQUISITO.md`.
-5. Transfira o conteúdo consolidado dos requisitos para as seções 3 e 4 do SRS.
+## Como rodar (tudo via Docker)
 
-### 2. Criar fichas de requisitos
-1. Faça uma cópia de `TEMPLATE_REQUISITO.md` para cada requisito.
-2. Nomeie os arquivos de forma consistente: `REQ-[CATEGORIA]-[NNN].md` (ex: `REQ-FUNC-001.md`).
-3. Preencha a tabela de **Análise de Conformidade com a Norma** para garantir qualidade antes da aprovação.
+Pré-requisito: **Docker** (e Docker Compose). Nenhuma instalação de Node.js, banco ou framework é necessária no hospedeiro.
 
-## Princípios da norma aplicados
+```bash
+# 1. Clone o repositório
+git clone git@github.com:Radsfer/projeto_prs_tecnologia.git
+cd projeto_prs_tecnologia
 
-### Características de um bom requisito (ISO/IEC/IEEE 29148:2018 — 5.2.5)
-Todo requisito deve ser:
-- **Necessário** — essencial para o sistema.
-- **Apropriado** — nível de detalhe compatível com a entidade.
-- **Não ambíguo** — uma única interpretação possível.
-- **Completo** — não depende de informações externas para ser compreendido.
-- **Singular** — um requisito por vez.
-- **Factível** — realizável dentro das restrições.
-- **Verificável** — comprovável de forma objetiva.
-- **Correto** — representa fielmente a necessidade.
-- **Conforme** — segue o padrão de escrita definido.
+# 2. Crie o arquivo de ambiente
+cp .env.example .env
 
-### Linguagem a ser evitada (ISO/IEC/IEEE 29148:2018 — 5.2.7)
-Evite nos requisitos:
-- Superlativos ("melhor", "mais")
-- Linguagem subjetiva ("fácil de usar", "amigável")
-- Pronomes vagos ("isso", "aquilo")
-- Termos abertos ("se aplicável", "no mínimo", "incluindo mas não se limitando a")
-- Termos de totalidade ("sempre", "nunca", "todos")
-- Comparativos ("melhor que", "maior qualidade")
+# 3. Suba a stack (PostgreSQL + backend + Mock IoT)
+docker compose up --build
+```
 
-> **Regra de ouro:** Diga **O QUE** é necessário, não **COMO** fazer.
+Na primeira subida o backend executa as migrações e o seed automaticamente.
+
+### Portas locais
+
+| Serviço | URL |
+|---------|-----|
+| API (backend) | http://localhost:3333 |
+| Mock de IoT | http://localhost:3001/mock |
+| PostgreSQL | localhost:5432 |
+
+### Credenciais sintéticas (seed)
+
+| Perfil | E-mail | Senha |
+|--------|--------|-------|
+| Gestor | `gestor@prs.com.br` | `Gestor@123` |
+| Operador | `operador@prs.com.br` | `Operador@123` |
+
+> Credenciais estáticas apenas para demonstração/desenvolvimento local.
+
+## Mock de IoT
+
+O backend consome o serviço de telemetria simulada por **polling assíncrono** (worker agendado). Por padrão o `.env.example` aponta para o mock local (`http://mock-iot:3001/mock`). Para consumir o mock hospedado na VPS, altere `MOCK_URL` para `https://prs.adolfo.tec.br/mock`.
+
+### Payload do Mock
+
+```json
+{
+  "machine_id": "11111111-1111-4111-8111-111111111111",
+  "timestamp": "2026-08-29T15:00:00.000Z",
+  "status_operacional": "RUNNING",
+  "ciclos_produzidos": 42
+}
+```
+
+- `machine_id`: UUID da máquina pré-cadastrada (desconhecido ⇒ descartado com auditoria).
+- `timestamp`: ISO 8601 em UTC.
+- `status_operacional`: `RUNNING` | `IDLE` | `FAULT`.
+- `ciclos_produzidos`: inteiro (volume desde a última leitura).
+
+## Estrutura do repositório
+
+```
+.
+├── backend/        # API Node.js + Express + Prisma (e worker de polling)
+├── mock-iot/       # Serviço simulador de telemetria (IIoT)
+├── docs/           # SRS e fichas de requisitos (ISO/IEC/IEEE 29148:2018)
+├── docker-compose.yml
+└── .env.example
+```

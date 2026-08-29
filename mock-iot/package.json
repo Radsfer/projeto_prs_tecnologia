@@ -1,0 +1,19 @@
+{
+  "name": "prodtrack-mock-iot",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Mock de IoT do ProdTrack — telemetria simulada (gêmeo digital simplificado de CLPs)",
+  "scripts": {
+    "dev": "tsx watch src/server.ts",
+    "start": "tsx src/server.ts"
+  },
+  "dependencies": {
+    "express": "^4.21.2"
+  },
+  "devDependencies": {
+    "@types/express": "^4.17.21",
+    "@types/node": "^22.10.1",
+    "tsx": "^4.19.2",
+    "typescript": "^5.6.3"
+  }
+}

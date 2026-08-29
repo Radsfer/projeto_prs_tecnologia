@@ -1,0 +1,55 @@
+services:
+  db:
+    image: postgres:16
+    container_name: prodtrack-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-prodtrack}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-prodtrack}
+      POSTGRES_DB: ${POSTGRES_DB:-prodtrack}
+    ports:
+      - "5432:5432"
+    volumes:
+      - db_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-prodtrack} -d ${POSTGRES_DB:-prodtrack}"]
+      interval: 5s
+      timeout: 5s
+      retries: 12
+
+  backend:
+    build: ./backend
+    container_name: prodtrack-backend
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+      mock-iot:
+        condition: service_started
+    environment:
+      DATABASE_URL: postgresql://${POSTGRES_USER:-prodtrack}:${POSTGRES_PASSWORD:-prodtrack}@db:5432/${POSTGRES_DB:-prodtrack}?schema=public
+      PORT: ${PORT:-3333}
+      JWT_SECRET: ${JWT_SECRET:-prodtrack-dev-secret}
+      JWT_EXPIRES_IN: ${JWT_EXPIRES_IN:-24h}
+      MOCK_URL: ${MOCK_URL:-http://mock-iot:3001/mock}
+      MOCK_PORT: ${MOCK_PORT:-3001}
+      POLL_INTERVAL_MS: ${POLL_INTERVAL_MS:-15000}
+      MOCK_TIMEOUT_MS: ${MOCK_TIMEOUT_MS:-3000}
+      GESTOR_EMAIL: ${GESTOR_EMAIL:-gestor@prs.com.br}
+      GESTOR_PASSWORD: ${GESTOR_PASSWORD:-Gestor@123}
+      OPERADOR_EMAIL: ${OPERADOR_EMAIL:-operador@prs.com.br}
+      OPERADOR_PASSWORD: ${OPERADOR_PASSWORD:-Operador@123}
+    ports:
+      - "3333:3333"
+
+  mock-iot:
+    build: ./mock-iot
+    container_name: prodtrack-mock-iot
+    restart: unless-stopped
+    environment:
+      MOCK_PORT: ${MOCK_PORT:-3001}
+    ports:
+      - "3001:3001"
+
+volumes:
+  db_data:

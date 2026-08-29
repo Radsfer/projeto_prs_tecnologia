@@ -1,0 +1,13 @@
+# Dependências e build
+node_modules/
+dist/
+*.log
+
+# Ambiente
+.env
+
+# Skills/agentes locais (não fazem parte do projeto)
+.agents/
+
+# Sistema
+.DS_Store

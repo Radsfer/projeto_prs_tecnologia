@@ -1,0 +1,107 @@
+// Prisma schema do ProdTrack
+// Fonte da verdade transacional (PostgreSQL 16).
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  GESTOR
+  OPERADOR
+}
+
+enum Unit {
+  pieces
+  kg
+  liters
+  meters
+}
+
+enum RecordSource {
+  MANUAL
+  IOT
+}
+
+model User {
+  id         String             @id @default(uuid())
+  email      String             @unique
+  name       String
+  password   String
+  role       Role               @default(OPERADOR)
+  active     Boolean            @default(true)
+  anonymized Boolean            @default(false)
+  createdAt  DateTime           @default(now())
+  updatedAt  DateTime           @updatedAt
+  records    ProductionRecord[]
+}
+
+model Machine {
+  id        String             @id @default(uuid())
+  name      String
+  code      String             @unique
+  unit      Unit
+  active    Boolean            @default(true)
+  createdAt DateTime           @default(now())
+  updatedAt DateTime           @updatedAt
+  targets   Target[]
+  records   ProductionRecord[]
+}
+
+model Shift {
+  id        String             @id @default(uuid())
+  name      String             @unique
+  startTime String // HH:MM
+  endTime   String // HH:MM
+  createdAt DateTime           @default(now())
+  updatedAt DateTime           @updatedAt
+  targets   Target[]
+  records   ProductionRecord[]
+}
+
+model Target {
+  id        String   @id @default(uuid())
+  machineId String
+  shiftId   String
+  date      DateTime @db.Date
+  quantity  Int
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  machine   Machine  @relation(fields: [machineId], references: [id], onDelete: Restrict)
+  shift     Shift    @relation(fields: [shiftId], references: [id], onDelete: Restrict)
+
+  @@unique([machineId, shiftId, date])
+  @@index([machineId, shiftId, date])
+}
+
+model ProductionRecord {
+  id              String       @id @default(uuid())
+  machineId       String
+  shiftId         String
+  date            DateTime     @db.Date
+  quantity        Int
+  downtimeMinutes Int          @default(0)
+  source          RecordSource @default(MANUAL)
+  userId          String?
+  createdAt       DateTime     @default(now())
+  updatedAt       DateTime     @updatedAt
+  machine         Machine      @relation(fields: [machineId], references: [id], onDelete: Restrict)
+  shift           Shift        @relation(fields: [shiftId], references: [id], onDelete: Restrict)
+  user            User?        @relation(fields: [userId], references: [id], onDelete: Restrict)
+
+  @@index([date, machineId, shiftId])
+}
+
+model AuditLog {
+  id        String   @id @default(uuid())
+  event     String
+  details   String?
+  actorId   String?
+  createdAt DateTime @default(now())
+
+  @@index([createdAt])
+}
