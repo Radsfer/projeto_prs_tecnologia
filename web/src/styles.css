@@ -416,3 +416,106 @@ tr:hover td {
     overflow-x: auto;
   }
 }
+
+/* ===== Operador (mobile-first) ===== */
+.op-shell {
+  min-height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.op-topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 20px;
+  height: 56px;
+  border-bottom: 1px solid var(--border);
+}
+
+.op-content {
+  flex: 1;
+  width: 100%;
+  max-width: 460px;
+  margin: 0 auto;
+  padding: 24px 20px;
+}
+
+.apontamento h1 {
+  font-size: 22px;
+  margin-bottom: 4px;
+}
+
+.apontamento > .muted {
+  margin-bottom: 20px;
+}
+
+/* Formulário com alvos de toque >= 48px (REQ-NFR-002) */
+.op-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-top: 20px;
+}
+
+.op-form label {
+  margin-bottom: 0;
+}
+
+.op-form input,
+.op-form select,
+.op-form button {
+  min-height: 48px;
+  font-size: 16px; /* evita zoom automático no iOS */
+}
+
+.op-form button {
+  width: 100%;
+  margin-top: 8px;
+  font-weight: 600;
+}
+
+/* Banner de feedback (eficiência / alerta) */
+.alert-banner {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 14px 16px;
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  margin-bottom: 16px;
+  font-size: 15px;
+}
+
+.alert-banner strong {
+  font-weight: 700;
+}
+
+.alert-banner span {
+  color: var(--ink-secondary);
+  font-size: 14px;
+}
+
+.alert-banner.critical {
+  color: var(--accent);
+  border-color: var(--accent);
+  background: #fdf0ee;
+}
+
+.alert-banner.critical span {
+  color: var(--accent);
+}
+
+.alert-banner.ok {
+  color: var(--green);
+  border-color: var(--green-border);
+  background: var(--green-bg);
+}
+
+.alert-banner.ok span {
+  color: var(--green);
+}
+
+.alert-banner.neutral {
+  color: var(--ink-secondary);
+}

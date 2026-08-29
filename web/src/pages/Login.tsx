@@ -1,6 +1,7 @@
 import { FormEvent, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../auth';
+import { getSessionUser } from '../api';
 
 export default function Login() {
   const { login } = useAuth();
@@ -16,7 +17,8 @@ export default function Login() {
     setLoading(true);
     try {
       await login(email, password);
-      navigate('/', { replace: true });
+      const u = getSessionUser();
+      navigate(u?.role === 'OPERADOR' ? '/apontamento' : '/', { replace: true });
     } catch (err) {
       setError((err as Error).message);
     } finally {
