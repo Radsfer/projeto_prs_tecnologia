@@ -133,3 +133,44 @@ O worker valida o payload e consolida os ciclos em apontamentos com `source=IOT`
 ├── docker-compose.prod.yml   # produção (VPS, sem exposição do banco)
 └── .env.example
 ```
+
+## Arquitetura
+
+Como as partes se comunicam. O Mock de IoT aparece como placeholder do servidor de telemetria que, em produção real, receberia os dados dos CLPs e sensores das máquinas.
+
+```mermaid
+flowchart LR
+    subgraph Clientes["Clientes"]
+        G["Gestor<br/>(navegador web)"]
+        O["Operador<br/>(navegador mobile, React Native futuro)"]
+    end
+
+    NG["Nginx: proxy reverso + TLS<br/>(prs.adolfo.tec.br)"]
+    WEB["Web: React + Vite<br/>(SPA estática)"]
+    API["API: Node.js + Express + Prisma"]
+    DB[("PostgreSQL 16<br/>rede interna")]
+    WK["Worker de polling<br/>(agendado)"]
+
+    subgraph IIoT["IIoT (produção real)"]
+        CLP["CLPs / sensores<br/>das máquinas"]
+        IOTS["Servidor de telemetria IoT<br/>(ingestão / broker)"]
+    end
+
+    MOCK["Mock de IoT<br/>(placeholder)"]
+
+    G -->|"HTTPS"| NG
+    O -->|"HTTPS"| NG
+    NG -->|"/"| WEB
+    NG -->|"/api"| API
+    NG -->|"/mock"| MOCK
+    WEB -->|"JSON via /api"| NG
+    API -->|"Prisma ORM"| DB
+    API --> WK
+    WK -->|"polling HTTP de saída, timeout 3s"| IOTS
+    CLP -->|"telemetria"| IOTS
+    MOCK -.->|"hoje: simula o servidor"| IOTS
+```
+
+## Licença
+
+MIT © 2026 Rafael Adolfo Silva Ferreira — contato: radsfer@pm.me. Veja [LICENSE](LICENSE).
