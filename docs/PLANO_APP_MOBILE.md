@@ -1,6 +1,8 @@
 # Plano do Aplicativo Móvel do Operador — ProdTrack
 
-> Status: **planejamento** · Referência: SRS (`docs/SRS_ProdTrack_v1.0.md`), fichas REQ-FUNC-005, REQ-FUNC-008, REQ-FUNC-009 e REQ-NFR-002.
+> Status: **planejamento (versão web mobile-first já implementada como demo)** · Referência: SRS (`docs/SRS_ProdTrack_v1.0.md`), fichas REQ-FUNC-005, REQ-FUNC-008, REQ-FUNC-009 e REQ-NFR-002.
+
+> Nota: para a demonstração, a experiência do operador já roda **no navegador** (web mobile-first) — login com `operador@prs.com.br` redireciona para a tela de apontamento em `http://localhost:3000`. Este plano descreve a evolução para o app **nativo** (React Native/Expo) quando necessário.
 
 ## 1. Objetivo e escopo
 

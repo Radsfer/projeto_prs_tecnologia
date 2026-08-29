@@ -11,7 +11,7 @@ Plataforma de apontamento produtivo e gestão industrial (Indústria 4.0) da **P
 | Backend (API) | Node.js + Express + Prisma ORM |
 | Banco de dados | PostgreSQL 16 |
 | Mock de IoT | Serviço Node.js (telemetria simulada) |
-| Web (Gestor) | React + Vite |
+| Web (Gestor + Operador mobile-first) | React + Vite |
 | Mobile (Operador) | React Native *(em planejamento)* |
 | Infra | Docker + Docker Compose, Nginx (proxy reverso) |
 
@@ -37,7 +37,7 @@ Na primeira subida o backend executa as migrações e o seed automaticamente.
 
 | Serviço | URL |
 |---------|-----|
-| Web (Gestor) | http://localhost:3000 |
+| Web (Gestor + Operador) | http://localhost:3000 |
 | API (backend) | http://localhost:3333 |
 | Mock de IoT | http://localhost:3001/mock |
 | PostgreSQL | localhost:5432 |
