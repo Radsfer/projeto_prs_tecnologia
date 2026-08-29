@@ -67,7 +67,7 @@ async function main() {
     });
   }
 
-  console.log('Seed concluído: 2 usuários, 3 máquinas, 3 turnos.');
+  console.log(`Seed concluído: 2 usuários, ${machines.length} máquinas, ${shifts.length} turnos.`);
 }
 
 main()
