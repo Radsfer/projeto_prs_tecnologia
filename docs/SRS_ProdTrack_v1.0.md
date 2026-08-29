@@ -93,19 +93,13 @@ O produto é composto por quatro elementos principais:
 
 A seguir, o diagrama de blocos conceitual (sem representar design definitivo):
 
-```
-[Operador - App Mobile] ──► ┌──────────────────────┐
-                            │   API Backend         │
-[Gestor - Web] ────────────► │ (Node.js + Express)  │
-                            │       │               │
-[Power BI / Fabric] ◄────── │ Prisma ORM ◄──┐      │
-                            └──────┬────────┼──────┘
-                                   ▼        │
-                            ┌────────────┐ │ (polling)
-                            │ PostgreSQL │ │
-                            └────────────┘ │
-                                           ▼
-                              [Mock IIoT - prs.adolfo.tec.br/mock]
+```mermaid
+flowchart LR
+    O["Operador (app mobile)"] --> API
+    G["Gestor (web)"] --> API
+    API["API Backend<br/>(Node.js + Express)"] -->|"Prisma ORM"| DB[("PostgreSQL")]
+    API -->|"polling"| MOCK["Mock IIoT<br/>(prs.adolfo.tec.br/mock)"]
+    DB --> BI["Power BI / Fabric"]
 ```
 
 #### 2.1.1 Interfaces de Sistema (System Interfaces)
@@ -363,7 +357,146 @@ As funções do sistema estão detalhadas nas fichas de requisitos funcionais:
 
 ## Apêndice B — Modelos de Análise
 
-*(A incluir em iteração futura: diagrama entidade-relacionamento do banco, diagrama de classes de domínio e diagrama de sequência da ingestão IIoT.)*
+### B.1 Diagrama entidade-relacionamento (banco)
+
+```mermaid
+erDiagram
+    User ||--o{ ProductionRecord : "registra"
+    Machine ||--o{ ProductionRecord : "produz"
+    Shift ||--o{ ProductionRecord : "ocorre em"
+    Machine ||--o{ Target : "tem meta"
+    Shift ||--o{ Target : "em"
+
+    User {
+        string id PK
+        string email UK
+        string name
+        enum role
+        boolean active
+        boolean anonymized
+    }
+    Machine {
+        string id PK
+        string name
+        string code UK
+        enum unit
+        boolean active
+    }
+    Shift {
+        string id PK
+        string name UK
+        string startTime
+        string endTime
+    }
+    Target {
+        string id PK
+        string machineId FK
+        string shiftId FK
+        date date
+        int quantity
+    }
+    ProductionRecord {
+        string id PK
+        string machineId FK
+        string shiftId FK
+        date date
+        int quantity
+        int downtimeMinutes
+        enum source
+        string userId FK
+    }
+    AuditLog {
+        string id PK
+        string event
+        string details
+        string actorId
+        datetime createdAt
+    }
+```
+
+### B.2 Diagrama de classes de domínio
+
+```mermaid
+classDiagram
+    class User {
+        +String id
+        +String email
+        +String name
+        +String password
+        +Role role
+        +Boolean active
+        +Boolean anonymized
+    }
+    class Machine {
+        +String id
+        +String name
+        +String code
+        +Unit unit
+        +Boolean active
+    }
+    class Shift {
+        +String id
+        +String name
+        +String startTime
+        +String endTime
+    }
+    class Target {
+        +String id
+        +String machineId
+        +String shiftId
+        +Date date
+        +Int quantity
+    }
+    class ProductionRecord {
+        +String id
+        +String machineId
+        +String shiftId
+        +Date date
+        +Int quantity
+        +Int downtimeMinutes
+        +RecordSource source
+        +String userId
+    }
+    class AuditLog {
+        +String id
+        +String event
+        +String details
+        +String actorId
+        +DateTime createdAt
+    }
+    User "1" --> "*" ProductionRecord
+    Machine "1" --> "*" ProductionRecord
+    Shift "1" --> "*" ProductionRecord
+    Machine "1" --> "*" Target
+    Shift "1" --> "*" Target
+```
+
+### B.3 Sequência da ingestão IIoT
+
+```mermaid
+sequenceDiagram
+    participant Mock as Mock de IoT
+    participant Worker as Worker (backend)
+    participant Backend as Backend (regras)
+    participant DB as PostgreSQL
+
+    loop a cada intervalo agendado
+        Worker->>Mock: GET /mock (timeout 3s)
+        alt responde a tempo
+            Mock-->>Worker: payload (machine_id, timestamp, status, ciclos)
+            Worker->>Backend: valida payload
+            Backend->>DB: consulta máquina (machine_id)
+            alt máquina desconhecida
+                Backend->>DB: grava AuditLog e descarta
+            else máquina conhecida
+                Backend->>DB: transação (upsert IOT + incremento)
+                DB-->>Backend: confirmado
+            end
+        else timeout / indisponível
+            Worker->>Worker: aborta e registra falha no log
+        end
+    end
+```
 
 ---
 
@@ -371,5 +504,4 @@ As funções do sistema estão detalhadas nas fichas de requisitos funcionais:
 
 | ID | Localização | Descrição | Responsável | Prazo |
 |----|-------------|-----------|-------------|-------|
-| TBD-001 | Apêndice B | Diagrama ER e de classes de domínio | Arquiteto | A definir |
 | TBD-002 | 2.1.7(d) | Política de backup/recuperação do ambiente de produção | DevOps | A definir |
