@@ -1,0 +1,76 @@
+# Compose de produção — VPS (prs.adolfo.tec.br)
+# Usado junto com um .env seguro (não versionado) com as credenciais reais.
+# Os serviços ingressam na rede externa "proxy" (do nginx-server) e NÃO
+# publicam portas no host; o banco fica em rede interna (sem exposição).
+#
+#   docker compose -f docker-compose.prod.yml up --build -d
+
+services:
+  db:
+    image: postgres:16
+    container_name: prodtrack-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    volumes:
+      - db_data:/var/lib/postgresql/data
+    networks:
+      - internal
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 5s
+      retries: 12
+
+  backend:
+    build: ./backend
+    container_name: prodtrack-backend
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB}?schema=public
+      PORT: 3333
+      JWT_SECRET: ${JWT_SECRET}
+      JWT_EXPIRES_IN: ${JWT_EXPIRES_IN:-24h}
+      MOCK_URL: ${MOCK_URL:-http://prodtrack-mock-iot:3001/mock}
+      POLL_INTERVAL_MS: ${POLL_INTERVAL_MS:-7000}
+      MOCK_TIMEOUT_MS: ${MOCK_TIMEOUT_MS:-3000}
+      GESTOR_EMAIL: ${GESTOR_EMAIL}
+      GESTOR_PASSWORD: ${GESTOR_PASSWORD}
+      OPERADOR_EMAIL: ${OPERADOR_EMAIL}
+      OPERADOR_PASSWORD: ${OPERADOR_PASSWORD}
+    networks:
+      - internal
+      - proxy
+
+  mock-iot:
+    build: ./mock-iot
+    container_name: prodtrack-mock-iot
+    restart: unless-stopped
+    environment:
+      MOCK_PORT: 3001
+    networks:
+      - proxy
+
+  web:
+    build:
+      context: ./web
+      args:
+        VITE_API_URL: ${VITE_API_URL:-/api}
+    container_name: prodtrack-web
+    restart: unless-stopped
+    networks:
+      - proxy
+
+networks:
+  internal:
+    driver: bridge
+  proxy:
+    external: true
+
+volumes:
+  db_data:

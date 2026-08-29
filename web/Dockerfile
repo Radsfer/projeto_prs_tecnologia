@@ -1,5 +1,8 @@
 FROM node:22-slim AS build
 WORKDIR /app
+# URL da API injetada no build (local: http://localhost:3333; produção: /api)
+ARG VITE_API_URL=http://localhost:3333
+ENV VITE_API_URL=$VITE_API_URL
 COPY package*.json ./
 RUN npm install
 COPY . .
