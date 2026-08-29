@@ -15,7 +15,7 @@ Plataforma de apontamento produtivo e gestão industrial (Indústria 4.0) da **P
 | Mobile (Operador) | React Native *(em planejamento)* |
 | Infra | Docker + Docker Compose, Nginx (proxy reverso) |
 
-## Como rodar (tudo via Docker)
+## Execução local (tudo via Docker)
 
 Pré-requisito: **Docker** (e Docker Compose). Nenhuma instalação de Node.js, banco ou framework é necessária no hospedeiro.
 
@@ -51,6 +51,29 @@ Na primeira subida o backend executa as migrações e o seed automaticamente.
 
 > Credenciais estáticas apenas para demonstração/desenvolvimento local.
 
+## Produção (VPS)
+
+O ProdTrack está publicado em **https://prs.adolfo.tec.br**:
+
+| Rota | Serviço |
+|------|---------|
+| `https://prs.adolfo.tec.br/` | Frontend web (Gestor + Operador mobile-first) |
+| `https://prs.adolfo.tec.br/api` | API (backend) |
+| `https://prs.adolfo.tec.br/mock` | Mock de IoT |
+
+O deploy é feito via **GitHub Actions** (CI/CD): a cada push em `main`, o pipeline roda build + typecheck e publica na VPS via SSH. O banco de dados fica em rede Docker interna, **sem exposição pública**.
+
+> As credenciais de produção (acesso do time PRS) **não** estão neste repositório — são configuradas exclusivamente via `.env` no servidor.
+
+## Segurança
+
+- Credenciais reais ficam apenas no `.env` do servidor (permissão `600`), nunca versionadas.
+- `.env.example` contém somente valores de demonstração.
+- Senhas com **bcrypt**; tokens **JWT HS256** (24h); **RBAC** (gestor/operador); **rate limiting** no login.
+- Banco de dados **sem exposição pública** (rede interna; acessado só pela API).
+- **HTTPS/TLS** via Let's Encrypt (terminação no proxy reverso).
+- Deploy via **chave SSH dedicada** com comando restrito e host pinado no CI/CD.
+
 ## Mock de IoT
 
 O backend consome o serviço de telemetria simulada por **polling assíncrono** (worker agendado). Por padrão o `.env.example` aponta para o mock local (`http://mock-iot:3001/mock`). Para consumir o mock hospedado na VPS, altere `MOCK_URL` para `https://prs.adolfo.tec.br/mock`.
@@ -77,10 +100,12 @@ O backend roda um **worker agendado** (polling) que interroga o `/mock`, valida 
 
 ```
 .
-├── backend/        # API Node.js + Express + Prisma (e worker de polling)
-├── mock-iot/       # Serviço simulador de telemetria (IIoT)
-├── web/            # Frontend React + Vite (interface do Gestor)
-├── docs/           # SRS e fichas de requisitos (ISO/IEC/IEEE 29148:2018)
-├── docker-compose.yml
+├── backend/                  # API Node.js + Express + Prisma (e worker de polling)
+├── mock-iot/                 # Serviço simulador de telemetria (IIoT)
+├── web/                      # Frontend React + Vite (Gestor + Operador)
+├── docs/                     # SRS e fichas de requisitos (ISO/IEC/IEEE 29148:2018)
+├── .github/workflows/        # CI/CD (build + deploy na VPS)
+├── docker-compose.yml        # execução local
+├── docker-compose.prod.yml   # produção (VPS, sem exposição do banco)
 └── .env.example
 ```
